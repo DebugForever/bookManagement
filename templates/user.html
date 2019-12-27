@@ -1,10 +1,10 @@
-<!DOCTYPE html>
+{% extends "base.html" %}
 
-<head>
-    <meta charset="utf-8">
-    <title>{{name}}的个人空间</title>
-</head>
+{% block title %}
+{{name}}'s home
+{% endblock %}
 
-<body>
-    <h1 style="color: aqua;">hello,{{name}}</h1>
-</body>
+{% block page_content %}
+{{super()}}
+<h1 style="color: aqua;">hello,{{name}}</h1>
+{% endblock %}

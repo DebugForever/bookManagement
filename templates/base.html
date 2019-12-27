@@ -17,10 +17,23 @@
         <div class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
                 <li><a href="/">Home</a></li>
+                {% if current_user.is_admin() %}
+                <li><a href="{{url_for('admin_page')}}">admin_interface</a></li>
+                {% endif %}
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                {% if current_user.is_authenticated %}
+                <li><a href="{{ url_for('user_page') }}">{{current_user.name}}</a></li>
+                <li><a href="{{ url_for('logout') }}">Log Out</a></li>
+                {% else %}
+                <li><a href="{{ url_for('login') }}">Log In</a></li>
+                {% endif %}
             </ul>
         </div>
     </div>
 </div>
+
+
 {% endblock %}
 
 {% block content %}
