@@ -1,0 +1,31 @@
+{% import "bootstrap/wtf.html" as wtf %}
+{% extends "base.html" %}
+
+{% block title %}
+all user
+{% endblock %}
+
+{% block page_content %}
+{{super()}}
+
+<table class="table table-hover">
+    <caption>query result</caption>
+    <thead>
+        <tr>
+            <th>id</th>
+            <th>name</th>
+            <th>admin</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in result %}
+        <tr>
+            <th>{{row.id}}</th>
+            <th>{{row.name}}</th>
+            <th>{{row.is_admin()}}</th>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

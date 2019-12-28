@@ -1,8 +1,11 @@
 {% import "bootstrap/wtf.html" as wtf %}
 {% extends "base.html" %}
 
+{% block title %}
+return book
+{% endblock %}
+
 {% block page_content %}
 {{super()}}
 {{wtf.quick_form(form)}}
-<p>not have a account yet?  <a href="#" class="btn btn-info" role="button">register</a></p>
 {% endblock %}

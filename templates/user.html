@@ -1,10 +1,15 @@
 {% extends "base.html" %}
 
 {% block title %}
-{{name}}'s home
+{{current_user.name}}'s home
 {% endblock %}
 
 {% block page_content %}
 {{super()}}
-<h1 style="color: aqua;">hello,{{name}}</h1>
+<h1>hello,{{current_user.name}}</h1>
+<ul class="list-group">
+    <li class="list-group-item">
+        <a href="{{ url_for('show_user_record',user_name=current_user.name) }}">borrow book record</a>
+    </li>
+</ul>
 {% endblock %}

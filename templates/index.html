@@ -2,6 +2,21 @@
 {% extends "base.html" %}
 
 {%block page_content%}
-<h1>hello</h1>
-{{ wtf.quick_form(form) }}
+<h1>welcome to book management system</h1>
+<ul class="list-group">
+    <li class="list-group-item">
+        <a href="{{ url_for('show_all_book') }}">show_all_book</a>
+    </li>
+    <li class="list-group-item">
+        <a href="{{ url_for('search_book') }}">search_book</a>
+    </li>
+    <li class="list-group-item">
+        <a href="{{ url_for('lend_book') }}">lend_book</a>
+    </li>
+    <li class="list-group-item">
+        <a href="{{ url_for('return_book') }}">return_book</a>
+    </li>
+
+</ul>
+
 {%endblock%}
