@@ -75,7 +75,7 @@ class User(UserMixin, db.Model):
     name = db.Column(db.String(64), nullable=False, unique=True)
     password_hash = db.Column(db.String(100), nullable=False)
     role_id = db.Column(db.Integer(), db.ForeignKey('role.id'))
-    default = db.Column(db.Boolean(), nullable=False,default=False)
+    default = db.Column(db.Boolean(), nullable=False, default=False)
 
     def __init__(self, **kw):
         super(User, self).__init__()
@@ -212,7 +212,13 @@ def load_user(user_id):
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    return render_template('index.html')
+    result=None
+    if current_user.is_authenticated:
+        result = db.session.query(Book,LendRecord)\
+            .join(Book,Book.id==LendRecord.bid)\
+            .filter(LendRecord.uid == current_user.id, LendRecord.return_date_time == None)\
+            .all()
+    return render_template('index.html', result=result)
 
 
 @app.route('/user/')
@@ -286,6 +292,7 @@ def add_book():
         return redirect(url_for('admin_page'))
     return render_template('add-book.html', form=form)
 
+
 @app.route('/function/search-book', methods=['GET', 'POST'])
 @login_required
 @permission_required(Permission.SEARCH)
@@ -294,7 +301,7 @@ def search_book():
     if form.validate_on_submit():
         name = form.name.data
         result = Book.query.filter(Book.name.like('%'+name+'%')).all()
-        return render_template('book-result.html', result=result,name=name)
+        return render_template('book-result.html', result=result, name=name)
     return render_template('search-book.html', form=form)
 
 
@@ -345,18 +352,68 @@ def return_book():
             flash('book not found')
             return redirect(url_for('return_book'))
 
-        record=LendRecord.query.filter_by(bid=book.id,uid=current_user.id,return_date_time=None).first()
+        record = LendRecord.query.filter_by(
+            bid=book.id, uid=current_user.id, return_date_time=None).first()
         if record is None:
             flash('you had not borrowed this book')
             return redirect(url_for('return_book'))
 
-        record.return_date_time=datetime.now()
-        book.stock+=1
+        record.return_date_time = datetime.now()
+        book.stock += 1
         db.session.add(book)
         db.session.add(record)
         db.session.commit()
         flash('successfully returned book')
-    return render_template('return_book.html',form=form)
+    return render_template('return_book.html', form=form)
+
+@app.route('/api/return-book')
+@login_required
+@permission_required(Permission.BORROW)
+def return_book_api():
+    id=request.args.get('id')
+    if id is not None:
+        result=LendRecord.query.filter_by(id=id,return_date_time=None)
+        count=0
+        for row in result:        
+            count+=1
+            book=Book.query.get(row.bid)
+            book.stock+=1
+            db.session.add(book)
+            row.return_date_time=datetime.now()
+            db.session.add(row)
+            db.session.commit()
+            flash('还书《%s》成功'%book.name)
+        if count==0:
+            flash('没有找到对应的借书记录')
+            return redirect(request.args.get('next') or url_for('index'))
+        # flash('还书成功，共还了%d本书'%count)
+    return redirect(request.args.get('next') or url_for('index'))
+
+
+@app.route('/api/lend-book')
+@login_required
+@permission_required(Permission.BORROW)
+def lend_book_api():
+    bid=request.args.get('bid')
+    if bid is not None:
+        book = Book.query.filter_by(id=bid).first()
+        if book is None:
+            flash('不存在的书')
+            return redirect(request.args.get('next') or url_for('index'))
+        if book.stock <= 0:
+            flash('这本书没有馆藏了')
+            return redirect(request.args.get('next') or url_for('index'))
+        record = LendRecord()
+        record.bid = book.id
+        record.uid = current_user.id
+        record.lend_date_time = datetime.now()
+        record.return_date_time = None
+        book.stock -= 1
+        db.session.add(book)
+        db.session.add(record)
+        db.session.commit()
+        flash('借书《%s》成功'%book.name)
+    return redirect(request.args.get('next') or url_for('index'))
 
 
 @app.route('/admin/show-all-record')
@@ -366,23 +423,31 @@ def show_all_record():
     result = LendRecord.query.all()
     return render_template('record-result.html', result=result)
 
+
 @app.route('/record/u/<user_name>')
 @login_required
 def show_user_record(user_name):
-    user=User.query.filter_by(name=user_name).first()
-    
-    if(user.id!=current_user.id and not current_user.is_admin()):
+    user = User.query.filter_by(name=user_name).first()
+
+    if(user.id != current_user.id and not current_user.is_admin()):
         abort(403)
     result = LendRecord.query.filter_by(uid=user.id)
     return render_template('record-result.html', result=result)
+
 
 @app.route('/admin/show-all-user')
 @login_required
 @admin_required
 def show_all_user():
-    result=User.query.all()
-    return render_template('user_result.html',result=result)
+    result = User.query.all()
+    return render_template('user_result.html', result=result)
 
-#reset_db()
+
+@app.route('/test')
+def test():
+    return render_template('test.html')
+
+
+# reset_db()
 if __name__ == '__main__':
     app.run(debug=True)
