@@ -6,9 +6,11 @@ from flask_bootstrap import Bootstrap
 from wtforms import StringField, SubmitField, PasswordField, BooleanField, ValidationError, IntegerField
 from wtforms.validators import DataRequired, Regexp, equal_to
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import or_,and_
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin, LoginManager, login_required, login_user, logout_user, AnonymousUserMixin, current_user
 from datetime import datetime
+import re
 
 app = Flask(__name__)
 bootstrap = Bootstrap(app)
@@ -169,39 +171,39 @@ def admin_required(func):
 
 
 class LoginForm(FlaskForm):
-    name = StringField('user name', validators=[Regexp('[a-zA-z0-9]{1,64}')])
-    password = PasswordField('password', validators=[
+    name = StringField('用户名', validators=[Regexp('[a-zA-z0-9]{1,64}')])
+    password = PasswordField('密码', validators=[
                              Regexp('[a-zA-z0-9]{1,64}')])
-    remember = BooleanField('remember me')
-    log_in = SubmitField('log in')
+    remember = BooleanField('记住我')
+    log_in = SubmitField('登录')
 
 
 class RegisterForm(FlaskForm):
-    name = StringField('user name', validators=[Regexp('[a-zA-z0-9]{1,64}')])
-    password = PasswordField('password', validators=[
-                             Regexp('[a-zA-z0-9]{1,64}', message='password can only contain a-z,A-z,0-9')])
-    password2 = PasswordField('password confirm', validators=[
-        DataRequired(), equal_to('password', message="passwords don't match")])
-    submit = SubmitField('register')
+    name = StringField('用户名', validators=[Regexp('[a-zA-z0-9]{1,64}', message='用户名只能包含a-z,A-z,0-9')])
+    password = PasswordField('密码', validators=[
+                             Regexp('[a-zA-z0-9]{1,64}', message='密码只能包含a-z,A-z,0-9')])
+    password2 = PasswordField('确认密码', validators=[
+        DataRequired(), equal_to('password', message="两次输入密码不一致")])
+    submit = SubmitField('注册')
 
     def validate_name(self, field):
         if User.query.filter_by(name=field.data).first():
-            raise ValidationError('name already exist')
+            raise ValidationError('用户名已存在')
 
 
 class BookForm(FlaskForm):
-    name = StringField('book name', validators=[DataRequired()])
-    author = StringField('author', validators=[DataRequired()])
-    stock = IntegerField('stock', validators=[DataRequired()])
-    price = IntegerField('price', validators=[DataRequired()])
-    isbn = StringField('isbn', validators=[DataRequired()])
-    press = StringField('press', validators=[DataRequired()])
-    submit = SubmitField('submit')
+    name = StringField('书名', validators=[DataRequired()])
+    author = StringField('作者', validators=[DataRequired()])
+    stock = IntegerField('馆藏', validators=[DataRequired()])
+    price = IntegerField('价格', validators=[DataRequired()])
+    isbn = StringField('ISBN', validators=[DataRequired()])
+    press = StringField('出版社', validators=[DataRequired()])
+    submit = SubmitField('提交')
 
 
 class BookSearchForm(FlaskForm):
-    name = StringField('book name', validators=[DataRequired()])
-    submit = SubmitField('submit')
+    name = StringField('书名，作者，出版社名，或者ISBN', validators=[DataRequired()])
+    submit = SubmitField('搜索')
 
 
 # flask_login需要实现的回调函数
@@ -237,9 +239,9 @@ def login():
                 login_user(user, form.remember.data)
                 return redirect(request.args.get('next') or url_for('index'))
             else:
-                flash('Invalid user name or password.')
+                flash('用户名与密码不匹配')
         else:
-            flash('user not found.')
+            flash('用户未找到')
     return render_template('login.html', form=form)
 
 
@@ -261,7 +263,7 @@ def register():
         user.role_id = User.query.filter_by(default=True).first
         db.session.add(user)
         db.session.commit()
-        flash('register complete!')
+        flash('注册成功！')
         return redirect(url_for('login'))
     return render_template('register.html', form=form)
 
@@ -288,7 +290,7 @@ def add_book():
         book.press = form.press.data
         db.session.add(book)
         db.session.commit()
-        flash('add complete')
+        flash('添加成功')
         return redirect(url_for('admin_page'))
     return render_template('add-book.html', form=form)
 
@@ -300,7 +302,18 @@ def search_book():
     form = BookSearchForm()
     if form.validate_on_submit():
         name = form.name.data
-        result = Book.query.filter(Book.name.like('%'+name+'%')).all()
+        match_result=re.match('[\d-]{13,17}',name)
+
+        name_filter=None
+        #ISBN pattern      
+        if match_result is not None:
+            name_filter=Book.isbn==name
+        elif name[-3:]=='出版社':
+            name_filter=Book.press==name
+        else:
+            name_filter=or_(Book.name.like('%'+name+'%'),Book.author.like('%'+name+'%'))
+
+        result = Book.query.filter(name_filter).all()
         return render_template('book-result.html', result=result, name=name)
     return render_template('search-book.html', form=form)
 
@@ -321,10 +334,10 @@ def lend_book():
         name = form.name.data
         book = Book.query.filter_by(name=name).first()
         if book is None:
-            flash('book not found')
+            flash('未找到该书籍')
             return redirect(url_for('lend_book'))
         if book.stock <= 0:
-            flash('book not in stock')
+            flash('该书籍暂无馆藏')
             return redirect(url_for('lend_book'))
         record = LendRecord()
         record.bid = book.id
@@ -335,7 +348,7 @@ def lend_book():
         db.session.add(book)
         db.session.add(record)
         db.session.commit()
-        flash('successful borrowed %s' % book.name)
+        flash('成功借书 《%s》' % book.name)
         return redirect(url_for('index'))
     return render_template('lend-book.html', form=form)
 
@@ -349,13 +362,13 @@ def return_book():
         name = form.name.data
         book = Book.query.filter_by(name=name).first()
         if book is None:
-            flash('book not found')
+            flash('未找到该书籍')
             return redirect(url_for('return_book'))
 
         record = LendRecord.query.filter_by(
             bid=book.id, uid=current_user.id, return_date_time=None).first()
         if record is None:
-            flash('you had not borrowed this book')
+            flash('你没有借过这本书')
             return redirect(url_for('return_book'))
 
         record.return_date_time = datetime.now()
@@ -363,7 +376,7 @@ def return_book():
         db.session.add(book)
         db.session.add(record)
         db.session.commit()
-        flash('successfully returned book')
+        flash('还书成功')
     return render_template('return_book.html', form=form)
 
 @app.route('/api/return-book')
