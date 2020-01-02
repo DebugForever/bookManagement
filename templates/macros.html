@@ -1,0 +1,65 @@
+{% macro show_book_and_time(result) %}
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th>书的id</th>
+            <th>书名</th>
+            <th>作者</th>
+            <th>ISBN</th>
+            <th>出版社</th>
+            <th>借出时间</th>
+            <th>还书</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in result %}
+        <tr>
+            <th>{{row.Book.id}}</th>
+            <th>{{row.Book.name}}</th>
+            <th>{{row.Book.author}}</th>
+            <th>{{row.Book.isbn}}</th>
+            <th>{{row.Book.press}}</th>
+            <th>{{row.LendRecord.lend_date_time}}</th>
+            <th><a href="{{url_for('return_book_api')}}?id={{row.LendRecord.id}}" class="btn btn-default"
+                    role="button">还书</a></th>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endmacro %}
+
+{% macro show_book(result) %}
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th>书的id</th>
+            <th>书名</th>
+            <th>作者</th>
+            <th>ISBN</th>
+            <th>出版社</th>
+            <th>馆藏</th>
+            <th>借书</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in result %}
+        <tr>
+            <th>{{row.id}}</th>
+            <th>{{row.name}}</th>
+            <th>{{row.author}}</th>
+            <th>{{row.isbn}}</th>
+            <th>{{row.press}}</th>
+            <th>{{row.stock}}</th>
+
+            {% if row.stock>0 %}
+            <th><a href="{{url_for('lend_book_api')}}?bid={{row.id}}" class="btn btn-default" role="button">借书</a></th>
+            {%else%}
+            <th><a href="{{url_for('lend_book_api')}}?bid={{row.id}}" class="btn btn-default disabled"
+                    role="button">暂无馆藏</a></th>
+            {%endif%}
+
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endmacro %}

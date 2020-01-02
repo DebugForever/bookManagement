@@ -17,18 +17,18 @@
         </div>
         <div class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
-                <li><a href="/">Home</a></li>
+                <li><a href="/">主页</a></li>
                 {% if current_user.is_admin() %}
-                <li><a href="{{url_for('admin_page')}}">admin_interface</a></li>
+                <li><a href="{{url_for('admin_page')}}">管理员界面</a></li>
                 {% endif %}
             </ul>
             <ul class="nav navbar-nav navbar-right">
                 {% if current_user.is_authenticated %}
                 <li><a href="{{ url_for('user_page') }}">{{current_user.name}}</a></li>
-                <li><a href="{{ url_for('logout') }}">Log Out</a></li>
+                <li><a href="{{ url_for('logout') }}">登出</a></li>
                 {% else %}
-                <li><a href="{{ url_for('register') }}">Register</a></li>
-                <li><a href="{{ url_for('login') }}">Log In</a></li>
+                <li><a href="{{ url_for('register') }}">注册</a></li>
+                <li><a href="{{ url_for('login') }}">登录</a></li>
                 {% endif %}
             </ul>
         </div>
