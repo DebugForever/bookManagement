@@ -1,0 +1,9 @@
+{% import "bootstrap/wtf.html" as wtf %}
+{% extends "base.html" %}
+
+{% block page_content %}
+{{super()}}
+{% for x in request.args %}
+<p>{{x}}={{request.args[x]}}</p>
+{% endfor %}
+{% endblock %}
