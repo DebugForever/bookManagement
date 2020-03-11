@@ -9,7 +9,7 @@
 <h1>hello,{{current_user.name}}</h1>
 <ul class="list-group">
     <li class="list-group-item">
-        <a href="{{ url_for('show_user_record',user_name=current_user.name) }}">borrow book record</a>
+        <a href="{{ url_for('main.show_user_record',user_name=current_user.name) }}">borrow book record</a>
     </li>
 </ul>
 {% endblock %}

@@ -5,10 +5,10 @@
 <h1>欢迎回来，{%if current_user.is_authenticated%}{{current_user.name}}{%else%}请先登录{%endif%}</h1>
 <ul class="list-group">
     <li class="list-group-item">
-        <a href="{{ url_for('show_all_book') }}">全部书籍</a>
+        <a href="{{ url_for('main.show_all_book') }}">全部书籍</a>
     </li>
     <li class="list-group-item">
-        <a href="{{ url_for('search_book') }}">搜索你要借的书籍</a>
+        <a href="{{ url_for('main.search_book') }}">搜索你要借的书籍</a>
     </li>
 </ul>
 {% if current_user.is_authenticated%}

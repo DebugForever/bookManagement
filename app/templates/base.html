@@ -19,16 +19,16 @@
             <ul class="nav navbar-nav">
                 <li><a href="/">主页</a></li>
                 {% if current_user.is_admin() %}
-                <li><a href="{{url_for('admin_page')}}">管理员界面</a></li>
+                <li><a href="{{url_for('main.admin_page')}}">管理员界面</a></li>
                 {% endif %}
             </ul>
             <ul class="nav navbar-nav navbar-right">
                 {% if current_user.is_authenticated %}
-                <li><a href="{{ url_for('user_page') }}">{{current_user.name}}</a></li>
-                <li><a href="{{ url_for('logout') }}">退出登录</a></li>
+                <li><a href="{{ url_for('main.user_page') }}">{{current_user.name}}</a></li>
+                <li><a href="{{ url_for('auth.logout') }}">退出登录</a></li>
                 {% else %}
-                <li><a href="{{ url_for('register') }}">注册</a></li>
-                <li><a href="{{ url_for('login') }}">登录</a></li>
+                <li><a href="{{ url_for('auth.register') }}">注册</a></li>
+                <li><a href="{{ url_for('auth.login') }}">登录</a></li>
                 {% endif %}
             </ul>
         </div>

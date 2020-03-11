@@ -20,8 +20,8 @@
             <th>{{row.Book.isbn}}</th>
             <th>{{row.Book.press}}</th>
             <th>{{row.LendRecord.lend_date_time}}</th>
-            <th><a href="{{url_for('return_book_api')}}?id={{row.LendRecord.id}}" class="btn btn-default"
-                    role="button">还书</a></th>
+            <th><a href="{{url_for('main.return_book_api')}}?id={{row.LendRecord.id}}" class="btn btn-default"
+                   role="button">还书</a></th>
         </tr>
         {% endfor %}
     </tbody>
@@ -52,10 +52,11 @@
             <th>{{row.stock}}</th>
 
             {% if row.stock>0 %}
-            <th><a href="{{url_for('lend_book_api')}}?bid={{row.id}}" class="btn btn-default" role="button">借书</a></th>
+            <th><a href="{{url_for('main.lend_book_api')}}?bid={{row.id}}" class="btn btn-default" role="button">借书</a>
+            </th>
             {%else%}
-            <th><a href="{{url_for('lend_book_api')}}?bid={{row.id}}" class="btn btn-default disabled"
-                    role="button">暂无馆藏</a></th>
+            <th><a href="{{url_for('main.lend_book_api')}}?bid={{row.id}}" class="btn btn-default disabled"
+                   role="button">暂无馆藏</a></th>
             {%endif%}
 
         </tr>

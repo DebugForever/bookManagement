@@ -9,22 +9,22 @@ admin interface
 <h1>管理员操作</h1>
 <ul class="list-group">
     <li class="list-group-item">
-        <a href="{{ url_for('add_book') }}">增加书籍</a>
+        <a href="{{ url_for('main.add_book') }}">增加书籍</a>
     </li>
     <li class="list-group-item">
-        <a href="{{ url_for('show_all_book') }}">显示全部书籍</a>
+        <a href="{{ url_for('main.show_all_book') }}">显示全部书籍</a>
     </li>
     <li class="list-group-item">
-        <a href="{{ url_for('show_all_record') }}">显示所有借书记录</a>
+        <a href="{{ url_for('main.show_all_record') }}">显示所有借书记录</a>
     </li>
     <li class="list-group-item">
-        <a href="{{ url_for('show_all_user') }}">显示所有用户</a>
+        <a href="{{ url_for('main.show_all_user') }}">显示所有用户</a>
     </li>
     <li class="list-group-item">
-        <a href="{{ url_for('lend_book') }}">[已弃用]借书</a>
+        <a href="{{ url_for('main.lend_book') }}">[已弃用]借书</a>
     </li>
     <li class="list-group-item">
-        <a href="{{ url_for('return_book') }}">[已弃用]还书</a>
+        <a href="{{ url_for('main.return_book') }}">[已弃用]还书</a>
     </li>
 </ul>
 
