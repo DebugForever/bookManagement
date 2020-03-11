@@ -83,61 +83,6 @@ def show_all_book():
     return render_template('book-result.html', result=result)
 
 
-@main.route('/function/lend-book', methods=['GET', 'POST'])
-@login_required
-@permission_required(Permission.BORROW)
-def lend_book():
-    form = BookSearchForm()
-    if form.validate_on_submit():
-        name = form.name.data
-        book = Book.query.filter_by(name=name).first()
-        if book is None:
-            flash('未找到该书籍')
-            return redirect(url_for('main.lend_book'))
-        if book.stock <= 0:
-            flash('该书籍暂无馆藏')
-            return redirect(url_for('main.lend_book'))
-        record = LendRecord()
-        record.bid = book.id
-        record.uid = current_user.id
-        record.lend_date_time = datetime.now()
-        record.return_date_time = None
-        book.stock -= 1
-        db.session.add(book)
-        db.session.add(record)
-        db.session.commit()
-        flash('成功借书 《%s》' % book.name)
-        return redirect(url_for('main.index'))
-    return render_template('lend-book.html', form=form)
-
-
-@main.route('/function/return-book', methods=['GET', 'POST'])
-@login_required
-@permission_required(Permission.BORROW)
-def return_book():
-    form = BookSearchForm()
-    if form.validate_on_submit():
-        name = form.name.data
-        book = Book.query.filter_by(name=name).first()
-        if book is None:
-            flash('未找到该书籍')
-            return redirect(url_for('main.return_book'))
-
-        record = LendRecord.query.filter_by(
-            bid=book.id, uid=current_user.id, return_date_time=None).first()
-        if record is None:
-            flash('你没有借过这本书')
-            return redirect(url_for('main.return_book'))
-
-        record.return_date_time = datetime.now()
-        book.stock += 1
-        db.session.add(book)
-        db.session.add(record)
-        db.session.commit()
-        flash('还书成功')
-    return render_template('return_book.html', form=form)
-
-
 @main.route('/api/return-book')
 @login_required
 @permission_required(Permission.BORROW)

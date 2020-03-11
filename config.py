@@ -1,4 +1,4 @@
-# 使用环境变量来使得应用更安全
+# todo 使用环境变量来使得应用更安全
 class Config:
     SECRET_KEY = '3e9d543c2f'
     SQLALCHEMY_COMMIT_ON_TEARDOWN = True

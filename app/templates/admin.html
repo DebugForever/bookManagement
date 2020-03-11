@@ -1,5 +1,5 @@
-{% import "bootstrap/wtf.html" as wtf %}
 {% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
 
 {%block title%}
 admin interface
@@ -19,12 +19,6 @@ admin interface
     </li>
     <li class="list-group-item">
         <a href="{{ url_for('main.show_all_user') }}">显示所有用户</a>
-    </li>
-    <li class="list-group-item">
-        <a href="{{ url_for('main.lend_book') }}">[已弃用]借书</a>
-    </li>
-    <li class="list-group-item">
-        <a href="{{ url_for('main.return_book') }}">[已弃用]还书</a>
     </li>
 </ul>
 
